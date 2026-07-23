@@ -17,20 +17,20 @@ describe("interface principal", () => {
     render(<OraculumApp />);
     expect(
       await screen.findByRole("heading", {
-        name: /Clareza para o que ainda não tem nome/i,
+        name: /Consulte o invisível. Compreenda o presente/i,
       }),
     ).toBeInTheDocument();
     expect(
       screen.getAllByRole("button", { name: /Nova leitura/i }).length,
     ).toBeGreaterThan(0);
-    expect(screen.getByText(/Sem cadastro/i)).toBeInTheDocument();
+    expect(screen.getByText(/Privacidade por design/i)).toBeInTheDocument();
   });
 
   it("abre o fluxo de nova leitura", async () => {
     const user = userEvent.setup();
     render(<OraculumApp />);
     await user.click(
-      await screen.findByRole("button", { name: /Iniciar uma leitura/i }),
+      await screen.findByRole("button", { name: /Iniciar leitura/i }),
     );
     expect(
       await screen.findByRole("heading", {
