@@ -1,6 +1,6 @@
 import { secureUuid } from "./random";
 
-const MODEL_ID = "SmolLM2-360M-Instruct-q4f16_1-MLC";
+const MODEL_ID = "Qwen2.5-1.5B-Instruct-q4f16_1-MLC";
 
 type ProgressCallback = (progress: number, text: string) => void;
 type PendingRequest = {
@@ -99,6 +99,6 @@ class LocalAIController {
 export const localAI = new LocalAIController();
 export const LOCAL_AI_MODEL = {
   id: MODEL_ID,
-  label: "SmolLM2 360M Instruct",
-  approximateSize: "aprox. 380 MB",
+  label: "Qwen 2.5 1.5B Instruct",
+  approximateSize: "aprox. 1,2 GB",
 };
