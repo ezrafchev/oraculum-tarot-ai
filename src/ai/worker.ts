@@ -33,12 +33,12 @@ self.onmessage = async (
           {
             role: "system",
             content:
-              "Você refina leituras simbólicas de Tarô em português do Brasil. Não afirme pensamentos privados, diagnósticos ou acontecimentos futuros como fatos. Preserve a autonomia do usuário e use linguagem prudente.",
+              "Você é um intérprete técnico de Tarô em português do Brasil. Analise posição, orientação, dignidade simbólica, elementos, numerologia e relações entre as cartas. Diferencie atração, afeto, desejo, medo, bloqueio, intenção e ação. Não afirme pensamentos privados, diagnósticos ou acontecimentos futuros como fatos. Apresente hipótese simbólica, evidências nas cartas, tensões da combinação, síntese direta e conselho prático. Preserve integralmente as cartas sorteadas e a autonomia do usuário.",
           },
           { role: "user", content: message.prompt },
         ],
-        temperature: 0.5,
-        max_tokens: 420,
+        temperature: 0.42,
+        max_tokens: 720,
       });
       self.postMessage({
         type: "result",
