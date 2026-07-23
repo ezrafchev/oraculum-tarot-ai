@@ -52,6 +52,7 @@ import {
   Star,
   Trash2,
   Upload,
+  UserCircle2,
   Wifi,
   WifiOff,
   X,
@@ -97,6 +98,19 @@ import type {
   ThemeName,
 } from "./types";
 import "./oraculum.css";
+
+type AccountUser = {
+  displayName: string;
+  email: string;
+  fullName: string | null;
+};
+
+type CloudSnapshot = {
+  readings?: ReadingRecord[];
+  methods?: SpreadMethod[];
+  settings?: AppSettings;
+  favoriteCards?: string[];
+};
 
 type Route =
   | "home"
@@ -244,7 +258,13 @@ function EmptyState({
   );
 }
 
-export default function OraculumApp() {
+export default function OraculumApp({
+  initialUser = null,
+  hosted = false,
+}: {
+  initialUser?: AccountUser | null;
+  hosted?: boolean;
+}) {
   const [route, setRoute] = useState<Route>("home");
   const [menuOpen, setMenuOpen] = useState(false);
   const [history, setHistory] = useState<ReadingRecord[]>([]);
@@ -289,6 +309,10 @@ export default function OraculumApp() {
     useState<BeforeInstallPromptEvent | null>(null);
   const [online, setOnline] = useState(true);
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [cloudReady, setCloudReady] = useState(false);
+  const [syncState, setSyncState] = useState<
+    "local" | "loading" | "synced" | "saving" | "error"
+  >(initialUser ? "loading" : "local");
 
   const allMethods = useMemo(
     () => [...SPREAD_METHODS, ...customMethods],
@@ -322,6 +346,92 @@ export default function OraculumApp() {
     window.addEventListener("hashchange", readHash);
     return () => window.removeEventListener("hashchange", readHash);
   }, []);
+
+  useEffect(() => {
+    if (!initialUser || !hosted) return;
+    let cancelled = false;
+
+    async function hydrateCloud() {
+      try {
+        const response = await fetch("/api/sync", {
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+        });
+        if (!response.ok) throw new Error("sync");
+        const payload = (await response.json()) as { data?: CloudSnapshot };
+        if (cancelled) return;
+        const cloud = payload.data;
+        if (cloud) {
+          await Promise.all([
+            ...(cloud.readings ?? []).map(saveReading),
+            ...(cloud.methods ?? []).map(saveMethod),
+          ]);
+          if (cloud.settings) await saveSettings(cloud.settings);
+          if (cloud.favoriteCards) {
+            await saveFavoriteCards(cloud.favoriteCards);
+          }
+          const [savedReadings, savedMethods, savedSettings, savedFavorites] =
+            await Promise.all([
+              listReadings(),
+              listMethods(),
+              loadSettings(),
+              loadFavoriteCards(),
+            ]);
+          if (cancelled) return;
+          setHistory(savedReadings);
+          setCustomMethods(savedMethods);
+          setSettingsState(savedSettings);
+          setFavoriteCards(savedFavorites);
+        }
+        setSyncState("synced");
+        setCloudReady(true);
+      } catch {
+        if (!cancelled) {
+          setSyncState("error");
+          setToast(
+            "A nuvem está indisponível; seus dados locais continuam seguros.",
+          );
+        }
+      }
+    }
+
+    void hydrateCloud();
+    return () => {
+      cancelled = true;
+    };
+  }, [hosted, initialUser]);
+
+  useEffect(() => {
+    if (!initialUser || !hosted || !cloudReady) return;
+    const timer = window.setTimeout(async () => {
+      setSyncState("saving");
+      try {
+        const response = await fetch("/api/sync", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            readings: history,
+            methods: customMethods,
+            settings: settingsState,
+            favoriteCards,
+          }),
+        });
+        if (!response.ok) throw new Error("sync");
+        setSyncState("synced");
+      } catch {
+        setSyncState("error");
+      }
+    }, 900);
+    return () => window.clearTimeout(timer);
+  }, [
+    cloudReady,
+    customMethods,
+    favoriteCards,
+    history,
+    hosted,
+    initialUser,
+    settingsState,
+  ]);
 
   useEffect(() => {
     Promise.all([
@@ -907,54 +1017,62 @@ Escreva de 3 a 5 parágrafos claros, em português do Brasil, com um conselho pr
           <div className="hero__copy">
             <span className="eyebrow">
               <ShieldCheck size={14} />
-              Inteligência simbólica · privada · local
+              Tarô completo · IA privada · sorteio auditável
             </span>
-            <h1 aria-label="Clareza para o que ainda não tem nome.">
-              Clareza para o que
+            <h1 aria-label="Consulte o invisível. Compreenda o presente.">
+              Consulte o invisível.
               <br />
-              <em>ainda não tem nome.</em>
+              <em>Compreenda o presente.</em>
             </h1>
             <p>
-              Sorteio criptográfico, 78 arcanos e um motor especialista que
-              interpreta cada combinação diretamente no seu dispositivo.
+              Um oráculo digital de alta precisão simbólica, com 78 cartas,
+              métodos profissionais e inteligência artificial que aprofunda
+              cada combinação sem alterar o sorteio.
             </p>
             <div className="hero__actions">
               <button className="button button--primary" onClick={() => quickStart("situation-obstacle-advice")}>
-                Iniciar uma leitura
+                Iniciar leitura
                 <ArrowRight size={17} />
               </button>
-              <button className="button button--ghost" onClick={() => navigate("library")}>
-                Explorar os arcanos
+              <button className="button button--ghost" onClick={() => navigate("methods")}>
+                Explorar métodos
               </button>
             </div>
             <div className="trust-row" aria-label="Recursos principais">
               <span>
-                <LockKeyhole size={14} /> Sem cadastro
+                <LockKeyhole size={14} /> Privacidade por design
               </span>
               <span>
-                <WifiOff size={14} /> Funciona offline
+                <BrainCircuit size={14} /> IA local gratuita
               </span>
               <span>
-                <Database size={14} /> Dados no dispositivo
+                <Database size={14} /> Sincronização opcional
               </span>
             </div>
           </div>
-          <div className="hero__visual" aria-label="Baralho ORACULUM AI">
+          <div className="hero__visual hero-reading-preview" aria-label="Prévia de uma leitura de três cartas">
             <div className="celestial-orbit celestial-orbit--one" />
             <div className="celestial-orbit celestial-orbit--two" />
-            <div className="hero-deck">
-              <TarotCardBack index={2} active />
-              <TarotCardBack index={1} active />
-              <TarotCardBack index={0} active />
+            <div className="hero-preview__heading">
+              <span>✦</span>
+              <div>
+                <small>Método em destaque</small>
+                <b>Passado · Presente · Caminho</b>
+              </div>
             </div>
-            <span className="hero-sigil hero-sigil--a">✧</span>
-            <span className="hero-sigil hero-sigil--b">☾</span>
-            <span className="hero-sigil hero-sigil--c">·</span>
+            <div className="hero-deck">
+              {[0, 1, 2].map((index) => (
+                <div className="hero-deck__item" key={index}>
+                  <TarotCardBack index={index} active />
+                  <span>{["Passado", "Presente", "Caminho"][index]}</span>
+                </div>
+              ))}
+            </div>
             <div className="hero-proof">
               <ShieldCheck size={15} />
               <span>
-                <b>Web Crypto</b>
-                Fisher–Yates auditável
+                <b>{initialUser ? "Conta protegida" : "Modo privado"}</b>
+                {initialUser ? "Sincronização ativada" : "Dados neste dispositivo"}
               </span>
             </div>
           </div>
@@ -2840,18 +2958,52 @@ Escreva de 3 a 5 parágrafos claros, em português do Brasil, com um conselho pr
           </nav>
         </div>
         <div className="sidebar-footer">
+          <div className="account-card">
+            <span className="account-card__avatar">
+              <UserCircle2 size={21} />
+            </span>
+            <span>
+              <b>{initialUser?.displayName ?? "Sua conta ORACULUM"}</b>
+              <small>
+                {initialUser
+                  ? syncState === "saving"
+                    ? "Sincronizando…"
+                    : syncState === "error"
+                      ? "Modo local temporário"
+                      : "Dados protegidos e sincronizados"
+                  : hosted
+                    ? "Entre para preservar seus dados"
+                    : "Modo local neste dispositivo"}
+              </small>
+            </span>
+            {hosted ? (
+              <a
+                href={
+                  initialUser
+                    ? "/signout-with-chatgpt?return_to=%2F"
+                    : "/signin-with-chatgpt?return_to=%2F"
+                }
+              >
+                {initialUser ? "Sair" : "Entrar"}
+              </a>
+            ) : null}
+          </div>
           <button className="privacy-card" onClick={() => navigate("privacy")}>
             <ShieldCheck size={18} />
             <span>
               <b>Privado por design</b>
-              <small>Seus dados ficam neste dispositivo</small>
+              <small>
+                {initialUser
+                  ? "Conta isolada e sincronização segura"
+                  : "Seus dados ficam neste dispositivo"}
+              </small>
             </span>
             <ChevronRight size={15} />
           </button>
           <div className="connection-status">
             {online ? <Wifi size={14} /> : <WifiOff size={14} />}
             {online ? "Online" : "Modo offline"}
-            <span>v1.0.0</span>
+            <span>v2.0.0</span>
           </div>
         </div>
       </aside>
