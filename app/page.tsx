@@ -1,5 +1,9 @@
 import OraculumApp from "../src/OraculumApp";
+import { getChatGPTUser } from "./chatgpt-auth";
 
-export default function Home() {
-  return <OraculumApp />;
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const user = await getChatGPTUser();
+  return <OraculumApp initialUser={user} hosted />;
 }
