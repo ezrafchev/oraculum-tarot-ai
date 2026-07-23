@@ -1,10 +1,10 @@
 :root {
   --font-scale: 1;
   --sidebar-width: 252px;
-  --bg: #07070c;
-  --bg-elevated: #0c0c13;
-  --panel: rgba(18, 17, 27, 0.82);
-  --panel-solid: #111019;
+  --bg: #09080d;
+  --bg-elevated: #0e0c14;
+  --panel: rgba(18, 16, 24, 0.82);
+  --panel-solid: #121018;
   --panel-soft: rgba(255, 255, 255, 0.035);
   --panel-hover: rgba(255, 255, 255, 0.065);
   --line: rgba(255, 255, 255, 0.09);
@@ -12,11 +12,11 @@
   --text: #f5f1e9;
   --muted: #9995a4;
   --muted-strong: #bab5c1;
-  --gold: #d7b66c;
-  --gold-bright: #efd08b;
-  --gold-soft: rgba(215, 182, 108, 0.12);
-  --violet: #8d79d6;
-  --violet-soft: rgba(141, 121, 214, 0.15);
+  --gold: #c7a86b;
+  --gold-bright: #e5d1a4;
+  --gold-soft: rgba(199, 168, 107, 0.12);
+  --violet: #7d4ac7;
+  --violet-soft: rgba(125, 74, 199, 0.15);
   --blue: #7697d8;
   --danger: #e47c80;
   --success: #88c8a2;
@@ -113,8 +113,8 @@ html {
 body {
   margin: 0;
   background:
-    radial-gradient(circle at 75% -15%, rgba(112, 86, 180, 0.13), transparent 35%),
-    radial-gradient(circle at 15% 70%, rgba(80, 105, 175, 0.06), transparent 34%),
+    radial-gradient(circle at 72% 8%, rgba(125, 74, 199, 0.17), transparent 34%),
+    radial-gradient(circle at 12% 48%, rgba(91, 45, 128, 0.12), transparent 30%),
     var(--bg);
   color: var(--text);
   font-family:
@@ -194,8 +194,61 @@ a {
   border-right: 1px solid var(--line);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 25%),
-    rgba(8, 8, 13, 0.91);
+    rgba(9, 8, 13, 0.93);
   backdrop-filter: blur(20px);
+}
+
+.account-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 12px;
+  border: 1px solid rgba(199, 168, 107, 0.18);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 0 0, rgba(125, 74, 199, 0.14), transparent 55%),
+    rgba(255, 255, 255, 0.025);
+}
+
+.account-card__avatar {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--gold-bright);
+}
+
+.account-card > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.account-card b,
+.account-card small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-card b {
+  font-size: 0.64rem;
+}
+
+.account-card small {
+  color: var(--muted);
+  font-size: 0.52rem;
+}
+
+.account-card a {
+  color: var(--gold);
+  font-size: 0.56rem;
+  font-weight: 750;
+  text-decoration: none;
 }
 
 :root[data-theme="moon"] .sidebar {
@@ -574,6 +627,145 @@ a {
   min-height: 525px;
   display: grid;
   place-items: center;
+}
+
+.hero-reading-preview {
+  min-height: 520px;
+  align-content: center;
+  padding: 74px 28px 66px;
+  overflow: hidden;
+  border: 1px solid rgba(199, 168, 107, 0.26);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(125, 74, 199, 0.2), transparent 44%),
+    linear-gradient(145deg, rgba(22, 17, 31, 0.92), rgba(9, 8, 13, 0.8));
+  box-shadow:
+    0 34px 90px rgba(0, 0, 0, 0.38),
+    inset 0 1px rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+}
+
+.hero-preview__heading {
+  position: absolute;
+  z-index: 4;
+  top: 24px;
+  left: 28px;
+  right: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(199, 168, 107, 0.24);
+}
+
+.hero-preview__heading > span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--gold-bright);
+}
+
+.hero-preview__heading div {
+  display: grid;
+}
+
+.hero-preview__heading small {
+  color: var(--muted);
+  font-size: 0.56rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.hero-preview__heading b {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.hero-reading-preview .hero-deck {
+  width: min(100%, 480px);
+  height: auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 14px;
+  perspective: 1200px;
+  transform: none;
+}
+
+.hero-reading-preview .hero-deck__item {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+  color: var(--muted-strong);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.8rem;
+  text-align: center;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hero-reading-preview .hero-deck__item:hover {
+  transform: translateY(-8px);
+}
+
+.hero-reading-preview .hero-deck__item .tarot-card {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  aspect-ratio: 0.62;
+  transform: none;
+}
+
+.hero-reading-preview .hero-proof {
+  right: 24px;
+  bottom: 18px;
+}
+
+.hero__copy h1 {
+  max-width: 740px;
+  font-size: clamp(3rem, 5.4vw, 5.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.hero__copy h1 em {
+  color: var(--gold-bright);
+}
+
+.hero__copy > p {
+  max-width: 650px;
+  font-size: 0.82rem;
+  line-height: 1.75;
+}
+
+.button--primary {
+  box-shadow:
+    0 12px 34px rgba(199, 168, 107, 0.2),
+    inset 0 1px rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 760px) {
+  .hero-reading-preview {
+    min-height: 460px;
+    padding-inline: 18px;
+  }
+
+  .hero-reading-preview .hero-deck {
+    gap: 8px;
+  }
+
+  .hero-reading-preview .hero-deck__item {
+    gap: 8px;
+    font-size: 0.62rem;
+  }
+
+  .hero-preview__heading {
+    left: 18px;
+    right: 18px;
+  }
 }
 
 .hero__visual::before {
